@@ -6,7 +6,6 @@
 package bg;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -16,18 +15,14 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import javax.crypto.KeyGenerator;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
 
 /**
  *
@@ -175,15 +170,16 @@ public class soru1 {
         myWriter2.close();
 
         ///////////////////////////////                            256 key                     //////////////////////////////////////
-        
-        byte[] iv2 = new byte[32];
+        byte[] iv2 = new byte[16];
         randomSecureRandom.nextBytes(iv2);
         IvParameterSpec ivParams256 = new IvParameterSpec(iv2);
         //   System.out.println(Arrays.toString(ivParams.getIV()));
+        cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
-        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeySpec keySpec = new SecretKeySpec(secretKey2.getEncoded(), "AES");
-        cipher.init(Cipher.ENCRYPT_MODE,keySpec , ivParams256);// 256 bit key 
+        
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParams256);// 256 bit key 
+        
         l = System.nanoTime();
         byte[] encrypted_256_file_txt = cipher.doFinal(MB.getBytes());
         // System.out.println(Arrays.toString(encrypted_file_txt));
@@ -208,10 +204,10 @@ public class soru1 {
         Path path256 = Paths.get("encrypted256.txt");
         byte[] encryptedtxt256 = Files.readAllBytes(path256);
         // System.out.println(Arrays.toString(dataec));
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParams); // DECRYPT_MODE , 128bit , iv
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParams256); // DECRYPT_MODE , 128bit , iv
         byte[] DECRYPT_256file_txt = cipher.doFinal(encryptedtxt256);// DECRYPT_MODE
-        System.out.println(Arrays.toString(MB.getBytes()));
-        System.out.println(Arrays.toString(DECRYPT_256file_txt));
+        //System.out.println(Arrays.toString(MB.getBytes()));
+        //System.out.println(Arrays.toString(DECRYPT_256file_txt));
 
         File decrypted256File = new File("decrypted256.txt");
         if (decrypted256File.createNewFile()) {
@@ -222,11 +218,11 @@ public class soru1 {
 
         FileWriter myWriter3 = new FileWriter("decrypted256.txt");
         FileOutputStream fos3 = new FileOutputStream(decrypted256File);
-        // Writes bytes from the specified byte array to this file output stream 
-        fos2.write(DECRYPT_256file_txt);
+        // Writes bytes from the specified byte array to this file output stream
+        fos3.write(DECRYPT_256file_txt);
         myWriter3.close();
         /////////////////////////////////////////////////////     DES in CBC mode (you need to generate a 56 bit key for this). ///////////////////////
-       
+
         //https://stackoverflow.com/questions/4985591/create-des-key-from-56-bit-binary-string
 //        KeyGenerator kgdes = KeyGenerator.getInstance("DES");
 //        kgdes.init(56);
@@ -289,6 +285,5 @@ public class soru1 {
 //        // Writes bytes from the specified byte array to this file output stream 
 //        fos4.write(DECRYPT_des_file_txt);
 //        myWriter4.close();
-
     }
 }

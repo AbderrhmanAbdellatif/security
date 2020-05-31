@@ -79,7 +79,8 @@ public class PeerThread extends Thread {
                         // decrypt nonce
                         byte targetNonceBytes[] = cipher.doFinal(targetNonce.getBytes(Constants.charsetName));// ---
                         //concatanated Message
-                        byte concatanatedMessage[] = peer.concatByteArray(encryptedMessage.getBytes(Constants.charsetName), targetNonceBytes);
+                        byte concatanatedMessage[]= peer.concatByteArray(encryptedMessage.getBytes(Constants.charsetName),targetNonceBytes);
+                       
                         // we make MAC from concatanated Message
                         byte macBytes[] = peer.macB.doFinal(concatanatedMessage);
                         //take nonce from message
@@ -145,7 +146,6 @@ public class PeerThread extends Thread {
                     X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
                     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                     peer.targetPublicKey = keyFactory.generatePublic(keySpec);
-                      
                     peer.sendCertificate();
 
                 } else if (jsonObject.containsKey("signal")) {
@@ -159,7 +159,7 @@ public class PeerThread extends Thread {
                     X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(in);
                     peer.targetPublicKey = certificate.getPublicKey();
                     peer.authenticationNonce = jsonObject.getInt("authenticationNonce");
-                    peer.messageNonce = peer.authenticationNonce;
+                    peer.messageNonce=peer.authenticationNonce;
                     peer.sendNonceBack();
 
                 } else if (jsonObject.containsKey("nonceBack")) {

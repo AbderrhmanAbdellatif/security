@@ -39,14 +39,16 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.json.Json;
 import sun.security.x509.X500Name;
 import sun.security.tools.keytool.CertAndKeyGen;
+
 /**
- * @Teachers  Ömer KORÇAK
+ * @Teachers Ömer KORÇAK
  * @author Abderrhman Abdellatif ,Mehmet Fatih GEZEN
  * @date 31/05/2020
- * @time  2:25 PM
+ * @time 2:25 PM
  * @class BLM442E Computer System Security
- * @ID    1421221042 ,1821221017
- **/
+ * @ID 1421221042 ,1821221017
+ *
+ */
 public class Peer {
 
     enum PeerType {
@@ -97,7 +99,7 @@ public class Peer {
     }
 
     public void sendCertificate() throws CertificateEncodingException, UnsupportedEncodingException {
-        authenticationNonce = sun.security.krb5.Confounder.intValue() & 0x7fffffff; 
+        authenticationNonce = sun.security.krb5.Confounder.intValue() & 0x7fffffff;
         messageNonce = authenticationNonce;
         serverThread.sendCertificate(rootCertificate, authenticationNonce);
     }
@@ -152,7 +154,7 @@ public class Peer {
 
             macB = Mac.getInstance("HmacSHA256");
             macB.init(kB);
-            
+
             SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             ivA = new byte[16];
             ivB = new byte[16];
@@ -210,7 +212,7 @@ public class Peer {
                         kpg.initialize(2048);
                         keys = kpg.generateKeyPair();
                     } else {
-                        peerType = PeerType.BOB; 
+                        peerType = PeerType.BOB;
                         // @sendSignal method for bob sends connection signal if connection complete
                         serverThread.sendSignal();
                         generateKeysAndCertificate();
@@ -230,7 +232,7 @@ public class Peer {
     }
 
     public void communicate(BufferedReader bufferedReader, String username, ServerThread serverThread) {
- 
+
         try {
             System.out.println("you can communicate");
             boolean flag = true;
@@ -250,46 +252,45 @@ public class Peer {
                         byte[] encryptedNonceBytes = null;
                         String encryptedNonceString = "";
                         if (peerType == PeerType.ALICE) {
-                            
+
                             IvParameterSpec ivParamsA = new IvParameterSpec(ivA);
                             cipher.init(Cipher.ENCRYPT_MODE, kA, ivParamsA);
-                            
+
                             mesaage = new String(cipher.doFinal(mesaage.getBytes(Constants.charsetName)), Constants.charsetName);
                             sequenceNumber++; // each time we increase sequence number  
                             messageNonce = messageNonce + sequenceNumber;
-                            
-                            
+
                             BigInteger bigInt = BigInteger.valueOf(messageNonce);
                             byte nonceByteArray[] = bigInt.toByteArray();
                             // encrypt Nonce 
                             encryptedNonceBytes = cipher.doFinal(nonceByteArray);
                             // byte to string 
-                            encryptedNonceString = new String(encryptedNonceBytes, Constants.charsetName);
-                            //concatanate Message and Nonce
+                            encryptedNonceString=new String(encryptedNonceBytes,Constants.charsetName);
+                             //concatanate Message and Nonce
                             byte concatanatedMessage[] = concatByteArray(mesaage.getBytes(Constants.charsetName), nonceByteArray);
                             // make message authentication code 
                             mac = Arrays.toString(macA.doFinal(concatanatedMessage));
-                            
+
                         } else if (peerType == PeerType.BOB) {
                             // make Iv Parameter
                             IvParameterSpec ivParamsB = new IvParameterSpec(ivB);
-                            
+
                             cipher.init(Cipher.ENCRYPT_MODE, kB, ivParamsB);
                             mesaage = new String(cipher.doFinal(mesaage.getBytes(Constants.charsetName)), Constants.charsetName);
                             sequenceNumber++;
                             messageNonce = messageNonce + sequenceNumber;
-                            
+
                             BigInteger bigInt = BigInteger.valueOf(messageNonce);
                             byte nonceByteArray[] = bigInt.toByteArray();
-                            
+
                             encryptedNonceBytes = cipher.doFinal(nonceByteArray);
-                            
+
                             encryptedNonceString = new String(encryptedNonceBytes, Constants.charsetName);
-                            
                             byte concatanatedMessage[] = concatByteArray(mesaage.getBytes(Constants.charsetName), nonceByteArray);
                             mac = Arrays.toString(macB.doFinal(concatanatedMessage));
-                            
-                        }   StringWriter stringWriter = new StringWriter();
+
+                        }
+                        StringWriter stringWriter = new StringWriter();
                         // make json object
                         Json.createWriter(stringWriter).writeObject(Json.createObjectBuilder()
                                 .add("username", username)

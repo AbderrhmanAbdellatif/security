@@ -15,4 +15,6 @@ package securityproject;
  **/
 public class Constants {
      public static final String charsetName = "ISO-8859-1";
+     public static final String FileName = "LOGFILE.txt";
+     
 }

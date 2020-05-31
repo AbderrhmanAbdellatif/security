@@ -1,0 +1,8 @@
+[Bob]Hi
+[Alice]Hi
+[Bob]i am Bob
+[Alice]i am Alice
+[Bob]nice to meet you
+[Alice]nice to meet you too
+[Bob]goodbye
+[Alice]goodbye

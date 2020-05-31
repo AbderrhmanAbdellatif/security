@@ -6,6 +6,9 @@
 package securityproject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -26,6 +29,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -265,8 +269,8 @@ public class Peer {
                             // encrypt Nonce 
                             encryptedNonceBytes = cipher.doFinal(nonceByteArray);
                             // byte to string 
-                            encryptedNonceString=new String(encryptedNonceBytes,Constants.charsetName);
-                             //concatanate Message and Nonce
+                            encryptedNonceString = new String(encryptedNonceBytes, Constants.charsetName);
+                            //concatanate Message and Nonce
                             byte concatanatedMessage[] = concatByteArray(mesaage.getBytes(Constants.charsetName), nonceByteArray);
                             // make message authentication code 
                             mac = Arrays.toString(macA.doFinal(concatanatedMessage));
@@ -310,4 +314,43 @@ public class Peer {
             Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+     String ReadFile(String fileName) throws Exception {
+        String tempstring = "";
+        File file = new File(fileName);
+         if (!file.exists()) {
+             file.createNewFile();
+         }
+        Scanner re = new Scanner(file);
+        while (re.hasNextLine()) {
+            String data = re.nextLine();
+            // System.out.println(data);
+            tempstring += data;
+        }
+        re.close();
+        return tempstring+"\n";
+    }
+
+     void WriteFile(String FileName, byte[] data) throws IOException {
+
+        File filename = new File(FileName);
+
+        FileWriter wr = new FileWriter(FileName);
+        FileOutputStream fos = new FileOutputStream(filename);
+        fos.write(data);
+        wr.close();
+
+    }
+
+     void WriteFile(String FileName, String data) throws IOException {
+
+        File filename = new File(FileName);
+
+        FileWriter wr = new FileWriter(FileName);
+        FileOutputStream fos = new FileOutputStream(filename);
+        fos.write(data.getBytes(Constants.charsetName));
+        wr.close();
+
+    }
+
 }

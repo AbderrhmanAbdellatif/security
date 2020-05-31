@@ -138,6 +138,9 @@ public class PeerThread extends Thread {
                     }
                     if (integrity) {
                         System.out.println("[" + jsonObject.getString("username") + "]" + mesaage);
+                      String  log=peer.ReadFile(Constants.FileName);
+                      log+="[" + jsonObject.getString("username") + "]" + mesaage+"\n";
+                      peer.WriteFile(Constants.FileName, log);
                     }
 
                 } else if (jsonObject.containsKey("publicKey")) {
@@ -191,6 +194,8 @@ public class PeerThread extends Thread {
                 flag = false;
                 interrupt();
             } catch (InvalidAlgorithmParameterException ex) {
+                Logger.getLogger(PeerThread.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
                 Logger.getLogger(PeerThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

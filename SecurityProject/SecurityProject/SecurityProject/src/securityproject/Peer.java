@@ -74,7 +74,7 @@ public class Peer {
     public static void main(String[] args) throws IOException, Exception {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("> enter username & port # for this peer:");
-        String[] setupValues = bufferedReader.readLine().split(" ");// input username and port 
+        String[] setupValues = bufferedReader.readLine().split(" ");
 
         serverThread = new ServerThread(Integer.parseInt(setupValues[1]));
         serverThread.start();
@@ -96,7 +96,7 @@ public class Peer {
     }
 
     public void sendNonceBack() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-        serverThread.sendNonceBack(keys.getPrivate(), authenticationNonce);// send nonce back to Alice 
+        serverThread.sendNonceBack(keys.getPrivate(), authenticationNonce);
     }
 
     public void decryptNonce(byte encryptedNonce[]) throws UnsupportedEncodingException {
@@ -104,7 +104,7 @@ public class Peer {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, targetPublicKey);
             byte[] decryptedNonceBytes = cipher.doFinal(encryptedNonce);
-            BigInteger noncebigInteger = new BigInteger(decryptedNonceBytes);// byte array to integer 
+            BigInteger noncebigInteger = new BigInteger(decryptedNonceBytes);
             compareNonce(noncebigInteger.intValue());
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
@@ -112,40 +112,43 @@ public class Peer {
     }
 
     public void compareNonce(int receivedNonce) throws UnsupportedEncodingException {
-        if (authenticationNonce == receivedNonce) { // compare nonce between alice and bob
+        if (authenticationNonce == receivedNonce) {
+            System.out.println("iyi bayramlar (:");
             serverThread.sendAcknowledgement();
         } else {
-            System.out.println("");
+            System.out.println("imamoglu ):");
         }
     }
 
     public void generateKeysAndCertificate() throws NoSuchAlgorithmException, NoSuchProviderException, IOException, CertificateException, InvalidKeyException, SignatureException, ClassNotFoundException {
-        //Generate ROOT certificate , public and private keys 
+        //Generate ROOT certificate
+
         CertAndKeyGen keyGen = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
         keyGen.generate(2048);
         PublicKey publicKey = keyGen.getPublicKey();
         PrivateKey rootPrivateKey = keyGen.getPrivateKey();
         keys = new KeyPair(publicKey, rootPrivateKey);
         rootCertificate = keyGen.getSelfCertificate(new X500Name("CN=ROOT"), (long) 365 * 24 * 60 * 60);
+        System.out.println(" generate Certificate ");
+        String s = new String(rootCertificate.getEncoded(), Constants.charsetName);
     }
 
     public void generateKeysAndMacs() throws UnsupportedEncodingException {
         try {
-            // alice key
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(128);
             kA = keyGenerator.generateKey();//Generating 128 bit AES key
-            // bob key
+
             KeyGenerator keyGenerator2 = KeyGenerator.getInstance("AES");
             keyGenerator2.init(128);
             kB = keyGenerator2.generateKey();//Generating 128 bit AES key
-            //use Mac object for message authentication code between bob and alice 
+
             macA = Mac.getInstance("HmacSHA256");
             macA.init(kA);
 
             macB = Mac.getInstance("HmacSHA256");
             macB.init(kB);
-            
+
             SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
             ivA = new byte[16];
             ivB = new byte[16];
@@ -160,13 +163,13 @@ public class Peer {
 
     public void SetKeys(SecretKey kA, SecretKey kB, byte ivA[], byte ivB[]) {
         try {
-            // set keys of bob made by alice 
             this.kA = kA;
             this.kB = kB;
             this.ivA = ivA;
             this.ivB = ivB;
             macA = Mac.getInstance("HmacSHA256");
             macA.init(kA);
+
             macB = Mac.getInstance("HmacSHA256");
             macB.init(kB);
             serverThread.sendCommunicationSignal();
@@ -192,19 +195,20 @@ public class Peer {
         String input = bufferedReader.readLine();
         String[] inputValues = input.split(" ");
         if (!input.equals("s")) {
-            for (String inputValue : inputValues) {
-                String[] address = inputValue.split(":");
+            for (int i = 0; i < inputValues.length; i++) {
+                String[] address = inputValues[i].split(":");
+
                 try {
                     socket = new Socket(address[0], Integer.valueOf(address[1]));
-                    // the peer who sends the first connection is described alice  
                     if (serverThread.peerCount == 0) {
                         peerType = PeerType.ALICE;
                         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
                         kpg.initialize(2048);
                         keys = kpg.generateKeyPair();
                     } else {
-                        peerType = PeerType.BOB; 
-                        // @sendSignal method for bob sends connection signal if connection complete
+                        peerType = PeerType.BOB;
+
+                        System.out.println("bob");
                         serverThread.sendSignal();
                         generateKeysAndCertificate();
                     }
@@ -213,6 +217,7 @@ public class Peer {
                 } catch (IOException | NumberFormatException e) {
                     if (socket != null) {
                         socket.close();
+                        System.out.println("buraya girdi");
                     } else {
                         System.out.println("invalid input");
                     }
@@ -223,7 +228,7 @@ public class Peer {
     }
 
     public void communicate(BufferedReader bufferedReader, String username, ServerThread serverThread) {
- 
+
         try {
             System.out.println("you can communicate");
             boolean flag = true;

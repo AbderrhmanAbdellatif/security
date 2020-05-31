@@ -6,10 +6,18 @@
 package securityproject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
+/**
+ * @Teachers  Ömer KORÇAK
+ * @author Abderrhman Abdellatif ,Mehmet Fatih GEZEN
+ * @date 31/05/2020
+ * @time  2:25 PM
+ * @class BLM442E Computer System Security
+ * @ID    1421221042 ,1821221017
+ **/
 public class ServerThreadThread extends Thread {
 
     private ServerThread serverThread;
@@ -22,6 +30,7 @@ public class ServerThreadThread extends Thread {
     }
 
 
+    @Override
     public void run() {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
@@ -29,9 +38,9 @@ public class ServerThreadThread extends Thread {
             this.printWriter = new PrintWriter(socket.getOutputStream(), true);
             
             while (true) {
-                 serverThread.sendMessage(bufferedReader.readLine());
+                serverThread.sendMessage(bufferedReader.readLine());
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             serverThread.getServerThreadThreads().remove(this);
         }
 

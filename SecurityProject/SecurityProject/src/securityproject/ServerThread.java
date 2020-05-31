@@ -27,7 +27,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.json.Json;
-
+/**
+ * @Teachers  Ömer KORÇAK
+ * @author Abderrhman Abdellatif ,Mehmet Fatih GEZEN
+ * @date 31/05/2020
+ * @time  2:25 PM
+ * @class BLM442E Computer System Security
+ * @ID    1421221042 ,1821221017
+ **/
 public class ServerThread extends Thread {
 
     private final ServerSocket serverSocket;
@@ -58,6 +65,7 @@ public class ServerThread extends Thread {
     }
 
     void sendMessage(String message) {
+        //carrierObject take the object between Peer and ServerThread and transfer the object to ServerThread class
         ServerThread serverThread= (ServerThread) Peer.carrierObject[2];
         try {
             serverThread.serverThreadThreads.forEach(t -> {
@@ -69,6 +77,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendSignal() {
+        //sendSignal method for bob sends connection signal if connection complete
         StringWriter stringWriter = new StringWriter();
         Json.createWriter(stringWriter).writeObject(Json.createObjectBuilder()
                 .add("signal", "ACK")
@@ -77,13 +86,14 @@ public class ServerThread extends Thread {
     }
 
     void sendCommunicationSignal() {
+        // sendCommunicationSignal 
         StringWriter stringWriter = new StringWriter();
         Json.createWriter(stringWriter).writeObject(Json.createObjectBuilder()
                 .add("communicationSignal", "ACK")
                 .build());
         sendMessage(stringWriter.toString());
     }
-
+     //send public key to bob
     public void sendHandshake(PublicKey publicKey) {
 
         String publicKeyString = Base64.getEncoder().encodeToString(publicKey.getEncoded());  
@@ -98,6 +108,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendKeys(SecretKey kA, SecretKey kB, byte ivA[], byte ivB[]) throws UnsupportedEncodingException {
+       //send key to bob 
         String kAString = new String(kA.getEncoded(), Constants.charsetName); 
         String kBString = new String(kB.getEncoded(), Constants.charsetName); 
         String ivAString = new String(ivA, Constants.charsetName); 
@@ -117,7 +128,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendCertificate(X509Certificate certificate, int nonce) {
-
+            // bob to  alice 
         try {
             String publicCertificateString = new String(certificate.getEncoded(), Constants.charsetName); 
 
@@ -137,7 +148,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendNonceBack(PrivateKey privateKey, int nonce) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-
+       // send Nonce Back to bob 
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
         byte[] array = ByteBuffer.allocate(4).putInt(nonce).array();
@@ -155,6 +166,7 @@ public class ServerThread extends Thread {
     }
 
     public void sendAcknowledgement() {
+        //if nonce is equal send acknowledgement to  alice 
         StringWriter stringWriter = new StringWriter();
         Json.createWriter(stringWriter).writeObject(Json.createObjectBuilder()
                 .add("ACK", "ack")
